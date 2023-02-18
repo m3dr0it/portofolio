@@ -5,33 +5,52 @@ import (
 	"log"
 	"net/http"
 	"portofolio/model"
+	"portofolio/service"
+	"portofolio/util"
 
 	"golang.org/x/exp/slices"
 )
 
-type UserLogin struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 func Login(w http.ResponseWriter, r *http.Request) {
-	allowedMethod := []string{"POST", "OPTIONS"}
+	allowedMethod := []string{"POST"}
+	message := ""
+	w.Header().Add("Content-Type", "application/json")
 
-	if !slices.Contains(allowedMethod, r.Method) {
-		w.Write([]byte("Method Not Allowed"))
+	responseJson, err := json.Marshal(model.BaseResponse{
+		Message: message,
+		Data:    "",
+	})
+
+	var userLoginStuct model.UserLogin
+
+	if !util.ValidatePayload(r, userLoginStuct) {
+		w.WriteHeader(http.StatusBadRequest)
+		responseJson, _ := json.Marshal(model.BaseResponse{
+			Message: "missing required field",
+			Data:    "",
+		})
+		w.Write(responseJson)
 		return
 	}
 
-	userLogin := new(UserLogin)
-	err := json.NewDecoder(r.Body).Decode(userLogin)
-	if err != nil {
+	if !slices.Contains(allowedMethod, r.Method) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	userLogin := new(model.UserLogin)
+	errDecoder := json.NewDecoder(r.Body).Decode(userLogin)
+	if errDecoder != nil {
 		log.Println(err.Error())
 	}
 
-	responseJson, err := json.Marshal(model.BaseResponse{
-		Message: "success",
-		Data:    "test",
-	})
+	signed := service.UserLogin(*userLogin)
+
+	if !signed {
+		message = "failed"
+	} else {
+		message = "success"
+	}
 
 	if err != nil {
 		log.Println(err.Error())
