@@ -15,7 +15,7 @@ type UserLogin struct {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	allowedMethod := []string{"POST", "OPTION"}
+	allowedMethod := []string{"POST", "OPTIONS"}
 
 	if !slices.Contains(allowedMethod, r.Method) {
 		w.Write([]byte("Method Not Allowed"))
