@@ -5,6 +5,6 @@ import (
 	"portofolio/controller"
 )
 
-func InitRoute() {
+func InitApiRoute() {
 	http.HandleFunc("/api/v1/login", controller.Login)
 }

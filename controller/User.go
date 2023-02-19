@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"portofolio/model"
 	"portofolio/service"
@@ -13,50 +13,54 @@ import (
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	allowedMethod := []string{"POST"}
-	message := ""
-	w.Header().Add("Content-Type", "application/json")
-
-	responseJson, err := json.Marshal(model.BaseResponse{
-		Message: message,
-		Data:    "",
-	})
-
-	var userLoginStuct model.UserLogin
-
-	if !util.ValidatePayload(r, userLoginStuct) {
-		w.WriteHeader(http.StatusBadRequest)
-		responseJson, _ := json.Marshal(model.BaseResponse{
-			Message: "missing required field",
-			Data:    "",
-		})
-		w.Write(responseJson)
-		return
-	}
 
 	if !slices.Contains(allowedMethod, r.Method) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	userLogin := new(model.UserLogin)
-	errDecoder := json.NewDecoder(r.Body).Decode(userLogin)
-	if errDecoder != nil {
-		log.Println(err.Error())
+	defer r.Body.Close()
+	w.Header().Add("Content-Type", "application/json")
+
+	body, _ := ioutil.ReadAll(r.Body)
+	var reqBody map[string]string
+	errParseReBody := json.Unmarshal(body, &reqBody)
+
+	if errParseReBody != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		responseJson, _ := json.Marshal(model.BaseResponse{
+			Message: "invalid payload",
+		})
+		w.Write(responseJson)
+		return
 	}
 
-	signed := service.UserLogin(*userLogin)
+	var userLoginStuct model.UserLogin
+	if !util.ValidatePayload(reqBody, userLoginStuct) {
+		w.WriteHeader(http.StatusBadRequest)
+		responseJson, _ := json.Marshal(model.BaseResponse{
+			Message: "missing required field",
+		})
+		w.Write(responseJson)
+		return
+	}
 
-	if !signed {
-		message = "failed"
-	} else {
+	userLogin := model.UserLogin{
+		Username: reqBody["username"],
+		Password: reqBody["password"],
+	}
+
+	signed := service.UserLogin(userLogin)
+
+	message := "failed"
+	if signed {
 		message = "success"
 	}
 
-	if err != nil {
-		log.Println(err.Error())
-	}
-
 	w.Header().Add("Content-Type", "application/json")
-
+	responseJson, _ := json.Marshal(model.BaseResponse{
+		Message: message,
+		Data:    "",
+	})
 	w.Write(responseJson)
 }

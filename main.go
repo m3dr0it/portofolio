@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	router.InitRoute()
+	router.InitApiRoute()
+	router.InitViewRoute()
 	server := new(http.Server)
 	server.Addr = fmt.Sprintf(":%d", config.Configuration().Server.Port)
 
