@@ -51,16 +51,36 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	signed := service.UserLogin(userLogin)
+	w.Header().Add("Content-Type", "application/json")
 
-	message := "failed"
-	if signed {
-		message = "success"
+	if !signed {
+		responseJson, _ := json.Marshal(model.BaseResponse{
+			Message: "failed",
+			Data:    model.Data{},
+		})
+		w.Write(responseJson)
+		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	token, errGenerateToken := service.GenerateJWT(userLogin.Username)
+
+	if errGenerateToken != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		responseJson, _ := json.Marshal(model.BaseResponse{
+			Message: "failed",
+			Data:    model.Data{},
+		})
+
+		w.Write(responseJson)
+		return
+	}
+
 	responseJson, _ := json.Marshal(model.BaseResponse{
-		Message: message,
-		Data:    "",
+		Message: "success",
+		Data: model.Data{
+			AccessToken: token,
+		},
 	})
 	w.Write(responseJson)
+
 }

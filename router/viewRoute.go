@@ -14,18 +14,24 @@ func InitViewRoute() {
 	var errorPagePath = path.Join("view", "error.html")
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		var filepath = path.Join("view", "login.html")
-		var tmpl, err = template.ParseFiles(filepath)
+		switch r.Method {
+		case "GET":
+			var filepath = path.Join("view", "login.html")
+			var tmpl, err = template.ParseFiles(filepath)
 
-		if err != nil {
-			tmpl.Execute(w, errorPagePath)
-			return
-		}
+			if err != nil {
+				tmpl.Execute(w, errorPagePath)
+				return
+			}
 
-		err = tmpl.Execute(w, filepath)
+			err = tmpl.Execute(w, filepath)
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+
+		case "POST":
+
 		}
 	})
 }
