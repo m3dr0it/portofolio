@@ -56,7 +56,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if !signed {
 		responseJson, _ := json.Marshal(model.BaseResponse{
 			Message: "failed",
-			Data:    model.Data{},
 		})
 		w.Write(responseJson)
 		return
@@ -68,7 +67,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		responseJson, _ := json.Marshal(model.BaseResponse{
 			Message: "failed",
-			Data:    model.Data{},
 		})
 
 		w.Write(responseJson)
@@ -77,7 +75,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	responseJson, _ := json.Marshal(model.BaseResponse{
 		Message: "success",
-		Data: model.Data{
+		Data: model.LoginResponse{
 			AccessToken: token,
 		},
 	})

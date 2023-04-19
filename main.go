@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"portofolio/config"
-	"portofolio/router"
+	"portofolio/controller"
+	"portofolio/middleware"
 )
 
 func main() {
-	router.InitApiRoute()
-	router.InitViewRoute()
-	server := new(http.Server)
-	server.Addr = fmt.Sprintf(":%d", config.Configuration().Server.Port)
+	mux := http.NewServeMux()
+	middleware.PrepareHeaderResponse(mux)
+	mux.Handle("/api/v1/article", middleware.ValidateToken(controller.GetArticles()))
+	mux.HandleFunc("/api/v1/login", controller.Login)
+	port := config.Configuration().Server.Port
+	server := http.Server{
+		Addr:    fmt.Sprintf("localhost:%d", port),
+		Handler: mux,
+	}
 
 	server.ListenAndServe()
 }
