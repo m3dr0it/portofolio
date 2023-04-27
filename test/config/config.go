@@ -10,7 +10,7 @@ import (
 
 type _Configuration struct {
 	Server struct {
-		Port int `json:port`
+		Port int `json:"port"`
 	}
 	JwtExpired   int8   `json:"jwt_expired"`
 	JwtSecretKey string `json:"jwt_secret_key"`
