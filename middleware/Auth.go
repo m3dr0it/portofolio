@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"portofolio/model"
 	"portofolio/service"
@@ -17,6 +16,7 @@ func ValidateToken(handler http.Handler) http.Handler {
 		if authTokenBearer == "" {
 			response, _ := json.Marshal(model.BaseResponse{
 				Message: "Unauthorized",
+				Data:    new(map[string]string),
 			})
 
 			w.WriteHeader(http.StatusUnauthorized)
@@ -25,12 +25,12 @@ func ValidateToken(handler http.Handler) http.Handler {
 		}
 
 		authToken := strings.Replace(authTokenBearer, "Bearer ", "", -1)
-		fmt.Println(authToken)
-		isValid, err := service.ValidateJWT(authToken)
+		userInfo, err := service.ValidateJWT(authToken)
 
-		if err != nil || !isValid {
+		if err != nil || userInfo.Username == "" {
 			response, _ := json.Marshal(model.BaseResponse{
 				Message: "Unauthorized",
+				Data:    new(map[string]string),
 			})
 
 			w.WriteHeader(http.StatusUnauthorized)

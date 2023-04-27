@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"portofolio/config"
+	"portofolio/model"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -32,7 +33,7 @@ func GenerateJWT(username string) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateJWT(tokenString string) (bool, error) {
+func ValidateJWT(tokenString string) (model.UserInfo, error) {
 	secretKey := config.Configuration().JwtSecretKey
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
@@ -45,11 +46,19 @@ func ValidateJWT(tokenString string) (bool, error) {
 		return []byte(secretKey), nil
 	})
 
-	log.Println(token)
+	myClaim, ok := token.Claims.(jwt.MapClaims)
 
-	if err != nil {
-		return false, err
+	if ok && token.Valid {
+		log.Println(myClaim["username"])
 	}
 
-	return true, nil
+	log.Println(token.Claims)
+
+	if err != nil {
+		return model.UserInfo{}, err
+	}
+
+	return model.UserInfo{
+		Username: myClaim["username"].(string),
+	}, nil
 }

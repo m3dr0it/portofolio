@@ -14,6 +14,16 @@ type _Configuration struct {
 	}
 	JwtExpired   int8   `json:"jwt_expired"`
 	JwtSecretKey string `json:"jwt_secret_key"`
+	Database     struct {
+		Mongodb struct {
+			Url        string `json:"url"`
+			Port       int32  `json:"port"`
+			Username   string `json:"username"`
+			Password   string `json:"password"`
+			Database   string `json:"database"`
+			Collection string `json:"collection"`
+		}
+	}
 }
 
 var sharedConf *_Configuration
