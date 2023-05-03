@@ -53,6 +53,7 @@ func AddArticle(w http.ResponseWriter, r *http.Request) {
 	var article model.Article
 	body, err := ioutil.ReadAll(r.Body)
 
+	//separate article
 	if err != nil {
 		log.Println(err.Error())
 	}
