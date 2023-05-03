@@ -39,3 +39,22 @@ func GetArticles() ([]model.Article, error) {
 
 	return resultArticles, nil
 }
+
+func AddArticle(article model.Article) error {
+	ctx := context.Background()
+	db, err := db.MongoDbClient()
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	result, err := db.Collection(config.Configuration().Database.Mongodb.Collection).InsertOne(ctx, article)
+
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+	log.Println(result)
+
+	return nil
+}
