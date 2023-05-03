@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"portofolio/model"
 	"portofolio/service"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func ArticlesController() http.Handler {
@@ -54,6 +57,8 @@ func AddArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = json.Unmarshal(body, &article)
+	article.Id = uuid.New().String()
+	article.CreatedAt = time.Now()
 
 	if err != nil {
 		errResponse, _ := json.Marshal(model.BaseResponse{
