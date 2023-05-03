@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"portofolio/config"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -15,14 +16,25 @@ func MongoDbClient() (*mongo.Database, error) {
 
 	var ctx = context.Background()
 
+	timeout := 3 * time.Second
+
+	var ctxTo, cancel = context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	err = client.Connect(ctx)
+	err = client.Connect(ctxTo)
 
 	if err != nil {
-		return nil, err
+		panic(err)
+	}
+
+	err = client.Ping(ctxTo, nil)
+
+	if err != nil {
+		panic(err)
 	}
 
 	return client.Database(config.Configuration().Database.Mongodb.Collection), nil
