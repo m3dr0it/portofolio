@@ -13,7 +13,6 @@ import (
 )
 
 func ArticlesController() http.Handler {
-	//test commit
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			GetArticles(w, r)
